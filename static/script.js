@@ -4,8 +4,17 @@ document.getElementById('file').addEventListener('change', function(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.querySelector('.input-image').src = e.target.result;
-            document.getElementById('start').disabled = false;
+            const img = new Image();
+            img.onload = function() {
+                if (img.width === 16 && img.height === 16) {
+                    document.querySelector('.input-image').src = e.target.result;
+                    document.getElementById('start').disabled = false;
+                } else {
+                    alert('Please upload a 16x16 image.');
+                    document.getElementById('file').value = '';
+                }
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     }
@@ -23,7 +32,7 @@ document.getElementById('start').addEventListener('click', async function() {
     const imgSrc = document.querySelector('.input-image').src;
     if (imgSrc) {
         try {
-            const response = await fetch('/predict', {
+            const response = await fetch('/process_image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

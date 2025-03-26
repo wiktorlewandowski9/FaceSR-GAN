@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from pydantic import BaseModel
-import base64
-import uvicorn
+from base64 import b64decode, b64encode
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+from prediction import predict
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -19,15 +21,16 @@ def read_root():
     return html_content
 
 # Handle image processing requests
-@app.post("/predict")
-async def predict(request: ImageRequest):
-    image_data = request.image.split(",")[1]
-
-    # TODO: Add model prediction code here
-    # For now, we will just return the input image
-
-    processed_image = f"data:image/png;base64,{image_data}"
-    return {"processed_image": processed_image}
+@app.post("/process_image")
+async def process_image(request: ImageRequest):
+    try:
+        image_data = b64decode(request.image.split(",")[1])
+        processed_image = await predict(image_data)
+        
+        res = f"data:image/png;base64,{b64encode(processed_image).decode('utf-8')}"
+        return {"processed_image": res}
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
