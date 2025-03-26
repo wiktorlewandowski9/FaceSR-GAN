@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.12",
-    "torchvision>=0.21.0",
     "tqdm>=4.67.1",
     "uvicorn>=0.34.0",
 ]
