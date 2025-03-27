@@ -44,7 +44,7 @@ def preprocess_and_save_hdf5(dataset_dir, output_dir, train_ratio=0.9, validate_
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python train_test_split.py <dataset_dir> <output_dir>")
+        print("Usage: python preprocess.py <dataset_dir> <output_dir>")
         sys.exit(1)
 
     dataset_dir = sys.argv[1]
