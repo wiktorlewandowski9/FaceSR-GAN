@@ -5,7 +5,7 @@ from io import BytesIO
 from torchvision import transforms
 from torchvision.transforms import functional
 
-from generator import Generator
+from models.generator import Generator
 
 DEVICE =  'cuda' if torch.cuda.is_available() else 'cpu'
 

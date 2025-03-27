@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-from prediction import predict
+from inference.predict import predict
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
