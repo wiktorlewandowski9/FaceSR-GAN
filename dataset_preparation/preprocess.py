@@ -2,11 +2,9 @@ import os
 import shutil
 from torch.utils.data import random_split
 from tqdm import tqdm
+import argparse
 
-def split_dataset(train_ratio=0.9, validate_ratio=0.05, test_ratio=0.05):
-
-    dataset_dir, output_dir = "unordered_data", "splitted_data"
-
+def split_dataset(dataset_dir, output_dir, train_ratio, validate_ratio, test_ratio):
     # Ensure the ratios sum to 1
     assert train_ratio + validate_ratio + test_ratio == 1.0, "Ratios must sum to 1.0"
 
@@ -14,14 +12,11 @@ def split_dataset(train_ratio=0.9, validate_ratio=0.05, test_ratio=0.05):
     if not os.listdir(dataset_dir):
         raise ValueError("Input directory is empty. Please provide a valid dataset.")
 
-    # Check if output directory is not empty
-    if os.listdir(output_dir):
-        raise ValueError("Output directory is not empty. Please provide an empty directory.")
-
     # Create output directories
     train_dir = os.path.join(output_dir, 'train')
     validate_dir = os.path.join(output_dir, 'validate')
     test_dir = os.path.join(output_dir, 'test')
+
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(validate_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
@@ -54,4 +49,14 @@ def split_dataset(train_ratio=0.9, validate_ratio=0.05, test_ratio=0.05):
     print(f"Dataset split completed: {train_len} train, {validate_len} validate, {test_len} test files.")
 
 if __name__ == "__main__":
-    split_dataset()
+    parser = argparse.ArgumentParser(
+        description="Script to split a dataset into training, validation, and test sets."
+    )
+    parser.add_argument("--source", required=True, type=str, help="Path to the source dataset directory.")
+    parser.add_argument("--output", required=True, type=str, help="Path to the output directory for the split dataset.")
+    parser.add_argument("--train_size", required=False, type=float, help="Precent of training samples.", default=0.9)
+    parser.add_argument("--validate_size", required=False, type=float, help="Percent of validation samples." , default=0.05)
+    parser.add_argument("--test_size", required=False, type=float, help="Percent of test samples.", default=0.05)
+    args = parser.parse_args()
+
+    split_dataset(args.source, args.output, args.train_size, args.validate_size, args.test_size)
