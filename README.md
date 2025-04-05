@@ -23,8 +23,8 @@ To run the project locally, we use [`uv`](https://github.com/astral-sh/uv) for c
 
 2. **Install dependencies and PyTorch:**
    ```bash
-   uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
    uv sync
+   uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
    ```
 
 3. **Clone the repository:**
