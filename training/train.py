@@ -1,7 +1,7 @@
 import torch
 
-from generator import Generator
-from discriminator import Discriminator
+from models.generator import Generator
+from models.discriminator import Discriminator
 
 # ~~~~~~~~~~~~~~~ Loss functions ~~~~~~~~~~~~~~~~~~~
 def generator_loss(discriminator_output):

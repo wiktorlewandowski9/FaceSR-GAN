@@ -185,7 +185,8 @@ pyrightconfig.json
 pyvenv.cfg
 pip-selfcheck.json
 
-creating_dataset/*/*
+dataset_preparation/*/
 styles.css
 styles.css.map
 *.zip
+*.h5
