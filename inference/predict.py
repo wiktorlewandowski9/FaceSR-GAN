@@ -9,6 +9,7 @@ from io import BytesIO
 from torchvision import transforms
 from torchvision.transforms import functional
 from models.generator import Generator
+from PIL import ImageFilter
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -18,9 +19,7 @@ model.to(DEVICE)
 model.eval()
 
 transform = transforms.Compose([
-    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
 ])
 
 async def predict(image_data):
@@ -41,7 +40,7 @@ async def predict(image_data):
             output_tensor = model(input_tensor)
 
         output_tensor = output_tensor.squeeze(0).cpu().detach()
-        output_image = functional.to_pil_image((output_tensor * 0.5 + 0.5).clamp(0, 1))
+        output_image = functional.to_pil_image(output_tensor.clamp(0, 1))
 
         buffer = BytesIO()
         output_image.save(buffer, format="PNG")
