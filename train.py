@@ -4,6 +4,8 @@ import os
 import wandb
 from torchvision import transforms
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+from torch.amp import autocast
 
 from models.generator import Generator
 from models.discriminator import Discriminator
@@ -11,11 +13,9 @@ from models.discriminator import Discriminator
 #~~~~~~~~~~~~~~~~~ HYPERPARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~ 
 BATCH_SIZE = 128
 TRAIN_PATH = 'dataset_preparation/train'
-VALIDATE_PATH = 'dataset_preparation/validate'
 DEVICE = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-wandb.login(key="c408da80eb948362e5c033be150da49ad6b9c3c6")
 
-NUM_EPOCHS = 25
+NUM_EPOCHS = 10
 LR_G = 0.0001
 LR_D = 0.00001
 
@@ -45,45 +45,47 @@ class ImageDataset(torch.utils.data.Dataset):
 
 #~~~~~~~~~~~~~~~~~ TRAINING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	  
 
-def training_loop(generator, discriminator, optimizer_g, optimizer_d, criterion_d, train_dataloader, val_dataloader, num_epochs):
+def training_loop(generator, discriminator, optimizer_g, optimizer_d, criterion_d, train_dataloader, num_epochs):
     for epoch in range(num_epochs):
-        for i, (lr, hr) in enumerate(train_dataloader):
-            lr = lr.to(DEVICE)
-            hr = hr.to(DEVICE)
+        with tqdm(total=len(train_dataloader), desc=f"Epoch {epoch+1}/{num_epochs}", unit="batch") as pbar:
+            for i, (lr, hr) in enumerate(train_dataloader):
+                lr = lr.to(DEVICE)
+                hr = hr.to(DEVICE)
 
-            optimizer_g.zero_grad()
-            optimizer_d.zero_grad()
+                optimizer_g.zero_grad()
+                optimizer_d.zero_grad()
 
-            fake_hr = generator(lr)
+                with autocast(device_type='cuda:1'):
+                    fake_hr = generator(lr)
 
-            # Discriminator Loss (L_D^{GAN})
-            real_out = discriminator(hr)
-            fake_out = discriminator(fake_hr.detach())
+                    real_out = discriminator(hr)
+                    fake_out = discriminator(fake_hr.detach())
 
-            real_labels = torch.ones_like(real_out, device=DEVICE)
-            fake_labels = torch.zeros_like(fake_out, device=DEVICE)
+                    real_labels = torch.ones_like(real_out, device=DEVICE)
+                    fake_labels = torch.zeros_like(fake_out, device=DEVICE)
 
-            loss_real = criterion_d(real_out, real_labels)
-            loss_fake = criterion_d(fake_out, fake_labels)
-            loss_d = loss_real + loss_fake
+                    loss_real = criterion_d(real_out, real_labels)
+                    loss_fake = criterion_d(fake_out, fake_labels)
+                    loss_d = loss_real + loss_fake
 
-            loss_d.backward()
-            optimizer_d.step()
+                loss_d.backward()
+                optimizer_d.step()
 
-            # Generator Loss (L_G^{GAN})
-            fake_out = discriminator(fake_hr)
-            real_labels_for_g = torch.ones_like(fake_out, device=DEVICE)  # Generator tries to fool discriminator
+                with autocast(device_type='cuda:1'):
+                    fake_out = discriminator(fake_hr)
+                    real_labels_for_g = torch.ones_like(fake_out, device=DEVICE)
 
-            loss_g = criterion_d(fake_out, real_labels_for_g)
+                    loss_g = criterion_d(fake_out, real_labels_for_g)
 
-            loss_g.backward()
-            optimizer_g.step()
+                loss_g.backward()
+                optimizer_g.step()
 
-            if(i + 1) % 10 == 0:
                 wandb.log({
                     "Loss/Generator": loss_g.item(),
                     "Loss/Discriminator": loss_d.item(),
                 })
+
+                pbar.update(1)
 
         print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss G: {loss_g.item():.4f}, Train Loss D: {loss_d.item():.4f}")
         
@@ -102,7 +104,6 @@ if __name__ == "__main__":
     )
         
     train_dataloader = DataLoader(ImageDataset(TRAIN_PATH), batch_size=BATCH_SIZE, num_workers=4, pin_memory=True)
-    val_dataloader = DataLoader(ImageDataset(VALIDATE_PATH), batch_size=BATCH_SIZE, num_workers=4, pin_memory=True)
 
     model_g = Generator().to(DEVICE)
     model_d = Discriminator().to(DEVICE)
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     criterion_g = torch.nn.CrossEntropyLoss()
     criterion_d = torch.nn.BCEWithLogitsLoss()
     
-    training_loop(model_g, model_d, model_g_optim, model_d_optim, criterion_d, train_dataloader, val_dataloader, NUM_EPOCHS)
+    training_loop(model_g, model_d, model_g_optim, model_d_optim, criterion_d, train_dataloader, NUM_EPOCHS)
     wandb.finish()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~ TESTING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
