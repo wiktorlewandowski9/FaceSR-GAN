@@ -27,6 +27,34 @@ Our GAN architecture evolved through several iterations, each with unique trade-
 
 This evolutionary approach allowed us to understand the trade-offs between different super-resolution techniques in the context of facial image enhancement.
 
+## Generator models note
+
+Our generator architecture evolved across versions to explore different capacity and feature extraction approaches:
+
+### Generator v1
+The initial generator used a straightforward approach with PixelShuffle for upsampling:
+- 7 convolutional layers with gradually decreasing channel dimensions (3→128→512→128→256→128→64→3)
+- PixelShuffle upsampling (2×) after the second and third layers
+- Instance normalization and ReLU activation throughout the network
+- Final Tanh activation for normalized output
+
+### Generator v2
+The enhanced generator modified the architecture with different channel allocations:
+- 8 convolutional layers with a different channel progression (3→128→512→128→384→128→128→32→3)
+- Same PixelShuffle upsampling strategy as v1
+- Added an additional refinement layer (conv7) before final output
+- Higher capacity in middle layers (384 vs 256 channels)
+- More balanced feature reduction toward the output
+
+### Performance of generators
+It's important to note that v2 isn't necessarily always better than v1 in all scenarios:
+
+- **v1 Advantages**: More straightforward channel reduction may provide better convergence for some datasets; fewer parameters can lead to faster training and inference; simpler architecture may generalize better with limited training data.
+
+- **v2 Advantages**: Additional layer provides more capacity for learning complex features; different channel allocations may capture certain facial details better; modified architecture might handle certain image characteristics more effectively.
+
+The optimal choice between these architectures depends on specific requirements, dataset characteristics, and computational constraints. Our experiments showed that both architectures have merit in different contexts, highlighting the importance of architecture experimentation in GAN development.
+
 ## Setup & Installation
 To run the project locally, we use [`uv`](https://github.com/astral-sh/uv) for clean, reproducible Python environments:
 
