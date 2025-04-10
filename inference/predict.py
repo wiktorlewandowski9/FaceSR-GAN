@@ -14,7 +14,7 @@ from PIL import ImageFilter
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 model = Generator()
-model.load_state_dict(torch.load('trained_models/ver2.pth', map_location=DEVICE))
+model.load_state_dict(torch.load('trained_models/gen_ver2.pth', map_location=DEVICE))
 model.to(DEVICE)
 model.eval()
 
