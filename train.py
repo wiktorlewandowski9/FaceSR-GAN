@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.amp import autocast
 
-from models.generator import Generator
+from models.generator_v2 import Generator
 from models.discriminator import Discriminator
 
 #~~~~~~~~~~~~~~~~~ HYPERPARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~ 
