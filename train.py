@@ -13,7 +13,6 @@ BATCH_SIZE = 128
 TRAIN_PATH = 'dataset_preparation/train'
 VALIDATE_PATH = 'dataset_preparation/validate'
 DEVICE = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-wandb.login(key="c408da80eb948362e5c033be150da49ad6b9c3c6")
 
 NUM_EPOCHS = 25
 LR_G = 0.0001
@@ -79,11 +78,10 @@ def training_loop(generator, discriminator, optimizer_g, optimizer_d, criterion_
             loss_g.backward()
             optimizer_g.step()
 
-            if(i + 1) % 10 == 0:
-                wandb.log({
-                    "Loss/Generator": loss_g.item(),
-                    "Loss/Discriminator": loss_d.item(),
-                })
+            wandb.log({
+                "Loss/Generator": loss_g.item(),
+                "Loss/Discriminator": loss_d.item(),
+            })
 
         print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss G: {loss_g.item():.4f}, Train Loss D: {loss_d.item():.4f}")
         
