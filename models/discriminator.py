@@ -25,9 +25,9 @@ class Discriminator(nn.Module):
         self.relu4 = nn.LeakyReLU(0.2)
 
         self.flatten = nn.Flatten()
-        self.dense1 = nn.Linear(65536, 512)
+        self.dense1 = nn.Linear(65536, 1024)
         self.relu5 = nn.LeakyReLU(0.2)
-        self.dense2 = nn.Linear(512, 1)
+        self.dense2 = nn.Linear(1024, 1)
 
     def forward(self, x):
         x = self.conv1(x)
