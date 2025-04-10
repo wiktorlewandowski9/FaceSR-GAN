@@ -6,11 +6,11 @@ document.getElementById('file').addEventListener('change', function(event) {
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                if (img.width === 16 && img.height === 16) {
+                if (img.width === 64 && img.height === 64) {
                     document.querySelector('.input-image').src = e.target.result;
                     document.getElementById('start').disabled = false;
                 } else {
-                    alert('Please upload a 16x16 image.');
+                    alert('Please upload a 64x64 image.');
                     document.getElementById('file').value = '';
                 }
             };
